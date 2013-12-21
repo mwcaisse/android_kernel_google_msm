@@ -1707,7 +1707,12 @@ static bool msm_chg_aca_detect(struct msm_otg *motg)
 	if (motg->pdata->phy_type == CI_45NM_INTEGRATED_PHY)
 		goto out;
 
+	//0x87 is ULPI_CHRG_DET_OUTPUT
+	
 	int_sts = ulpi_read(phy, 0x87);
+	
+	dev_dbg(phy->dev, "MSM_CHG_ACA_DETECT INT_STS: %X\n", (int_sts & 0x1C));
+	
 	switch (int_sts & 0x1C) {
 	case 0x08:
 		if (!test_and_set_bit(ID_A, &motg->inputs)) {
@@ -1758,6 +1763,9 @@ static bool msm_chg_aca_detect(struct msm_otg *motg)
 			test_and_clear_bit(ID_B, &motg->inputs) |
 			test_and_clear_bit(ID_C, &motg->inputs) |
 			!test_and_set_bit(ID, &motg->inputs);
+		
+		dev_dbg(phy->dev, "MSM_OTG, fell through the charger state INT_STS: %X\n", (int_sts & 0x1C));
+		
 		if (ret) {
 			dev_dbg(phy->dev, "ID A/B/C/GND is no more\n");
 			motg->chg_type = USB_INVALID_CHARGER;
