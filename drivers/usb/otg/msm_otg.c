@@ -2186,7 +2186,7 @@ static void msm_chg_detect_work(struct work_struct *w)
 	}
 
 	switch (motg->chg_state) {
-	case USB_CHG_STATE_UNDEFINED:
+	case USB_CHG_STATE_UNDEFINED: //0
 		msm_chg_block_on(motg);
 		msm_chg_enable_dcd(motg);
 		msm_chg_enable_aca_det(motg);
@@ -2194,8 +2194,10 @@ static void msm_chg_detect_work(struct work_struct *w)
 		motg->dcd_time = 0;
 		delay = MSM_CHG_DCD_POLL_TIME;
 		break;
-	case USB_CHG_STATE_WAIT_FOR_DCD:
+	case USB_CHG_STATE_WAIT_FOR_DCD: //1
+		dev_dbg(phy->dev, "Waiting for DCD\n");
 		if (slimport_is_connected()) {
+			dev_dbg(phy->dev, "Slimport is connected \n");
 			msm_chg_block_off(motg);
 			motg->chg_state = USB_CHG_STATE_DETECTED;
 			motg->chg_type = USB_SDP_CHARGER;
@@ -2203,6 +2205,7 @@ static void msm_chg_detect_work(struct work_struct *w)
 			return;
 		}
 		if (msm_chg_mhl_detect(motg)) {
+			dev_dbg(phy->dev, "MHL is detected\n");
 			msm_chg_block_off(motg);
 			motg->chg_state = USB_CHG_STATE_DETECTED;
 			motg->chg_type = USB_INVALID_CHARGER;
@@ -2211,13 +2214,16 @@ static void msm_chg_detect_work(struct work_struct *w)
 		}
 		is_aca = msm_chg_aca_detect(motg);
 		if (is_aca) {
+			dev_dbg(phy->dev, "It is ACA\n");
 			/*
 			 * ID_A can be ACA dock too. continue
 			 * primary detection after DCD.
 			 */
 			if (test_bit(ID_A, &motg->inputs)) {
+				dev_dbg(phy->dev, "ID_A is set \n");
 				motg->chg_state = USB_CHG_STATE_WAIT_FOR_DCD;
 			} else {
+				dev_dbg(phy->dev, "ID_A is not set, breaking\n");
 				delay = 0;
 				break;
 			}
@@ -2234,7 +2240,7 @@ static void msm_chg_detect_work(struct work_struct *w)
 			delay = MSM_CHG_DCD_POLL_TIME;
 		}
 		break;
-	case USB_CHG_STATE_DCD_DONE:
+	case USB_CHG_STATE_DCD_DONE: //2
 		vout = msm_chg_check_primary_det(motg);
 		line_state = readl_relaxed(USB_PORTSC) & PORTSC_LS;
 		dm_vlgc = line_state & PORTSC_LS_DM;
@@ -2271,7 +2277,7 @@ static void msm_chg_detect_work(struct work_struct *w)
 			delay = 0;
 		}
 		break;
-	case USB_CHG_STATE_PRIMARY_DONE:
+	case USB_CHG_STATE_PRIMARY_DONE: //3
 		vout = msm_chg_check_secondary_det(motg);
 		if (vout)
 			motg->chg_type = USB_DCP_CHARGER;
@@ -2279,9 +2285,9 @@ static void msm_chg_detect_work(struct work_struct *w)
 			motg->chg_type = USB_CDP_CHARGER;
 		motg->chg_state = USB_CHG_STATE_SECONDARY_DONE;
 		/* fall through */
-	case USB_CHG_STATE_SECONDARY_DONE:
+	case USB_CHG_STATE_SECONDARY_DONE: //4
 		motg->chg_state = USB_CHG_STATE_DETECTED;
-	case USB_CHG_STATE_DETECTED:
+	case USB_CHG_STATE_DETECTED: //5
 		msm_chg_block_off(motg);
 		msm_chg_enable_aca_det(motg);
 		/*
