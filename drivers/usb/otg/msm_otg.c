@@ -1233,7 +1233,7 @@ static void msm_otg_notify_charger(struct msm_otg *motg, unsigned mA)
 							motg->chg_type);
 	}
 	else {
-		dev_dbg("Successfully notified %d charge type to PMIC\n",
+		dev_dbg(motg->phy.dev,"Successfully notified %d charger type to PMIC\n",
 			motg->chg_type);
 	}
 
