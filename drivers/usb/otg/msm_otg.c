@@ -1227,10 +1227,15 @@ static void msm_otg_notify_charger(struct msm_otg *motg, unsigned mA)
 			mA > IDEV_ACA_CHG_LIMIT)
 		mA = IDEV_ACA_CHG_LIMIT;
 
-	if (msm_otg_notify_chg_type(motg))
+	if (msm_otg_notify_chg_type(motg)) {
 		dev_err(motg->phy.dev,
 			"Failed notifying %d charger type to PMIC\n",
 							motg->chg_type);
+	}
+	else {
+		dev_dbg("Successfully notified %d charge type to PMIC\n",
+			motg->chg_type);
+	}
 
 	if (motg->cur_power == mA)
 		return;

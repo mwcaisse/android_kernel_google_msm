@@ -2076,13 +2076,17 @@ EXPORT_SYMBOL(pm8921_is_battery_charging);
 
 int pm8921_set_usb_power_supply_type(enum power_supply_type type)
 {
+	
+	pr_debug("Setting the USB Power supply type\n");
 	if (!the_chip) {
 		pr_err("called before init\n");
 		return -EINVAL;
 	}
 
-	if (type < POWER_SUPPLY_TYPE_USB)
+	if (type < POWER_SUPPLY_TYPE_USB) {
+		pr_debug("Unable to set USB power type. type %d is less than %d\n", type, POWER_SUPPLY_TYPE_USB);
 		return -EINVAL;
+	}
 
 	power_supply_changed(&the_chip->usb_psy);
 	power_supply_changed(&the_chip->dc_psy);
