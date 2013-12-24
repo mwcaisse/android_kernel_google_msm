@@ -1181,6 +1181,8 @@ static int msm_otg_notify_chg_type(struct msm_otg *motg)
 	else
 		charger_type = POWER_SUPPLY_TYPE_BATTERY;
 
+	dev_dbg(motg->phy.dev, "Setting charger type %d to %d \n", motg->chg_type,  charger_type);
+
 	return pm8921_set_usb_power_supply_type(charger_type);
 }
 
