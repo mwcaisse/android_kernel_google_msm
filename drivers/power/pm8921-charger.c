@@ -10,9 +10,9 @@
  * GNU General Public License for more details.
  *
  */
-#define pr_fmt(fmt)	"%s: " fmt, __func__
-
 #define DEBUG
+ 
+#define pr_fmt(fmt)	"%s: " fmt, __func__
 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
